@@ -399,7 +399,7 @@
     }
 
     .result-big-value {
-      font-size: 42px;
+      font-size: 40px;
       font-weight: 800;
       color: #047857;
       line-height: 1.1;
@@ -412,7 +412,7 @@
     }
 
     .result-unit-suffix {
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 700;
       color: #047857;
       letter-spacing: 0.5px;
@@ -425,20 +425,25 @@
     }
 
     .result-sub-badge {
-      display: inline-block;
-      margin-top: 10px;
-      font-size: 13px;
-      font-weight: 600;
-      background: #d1fae5;
-      color: #065f46;
-      padding: 3px 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 14px;
+      font-size: 19px;
+      font-weight: 800;
+      background: #059669;
+      color: #ffffff;
+      padding: 6px 20px;
       border-radius: 9999px;
+      box-shadow: 0 3px 10px rgba(5, 150, 105, 0.28);
+      letter-spacing: 0.5px;
       transition: all 0.3s ease;
     }
 
     .result-banner.is-loss .result-sub-badge {
-      background: #fee2e2;
-      color: #991b1b;
+      background: #dc2626;
+      color: #ffffff;
+      box-shadow: 0 3px 10px rgba(220, 38, 38, 0.28);
     }
 
     /* 结果表格 */
@@ -481,6 +486,16 @@
     .highlight-loss {
       color: #dc2626 !important;
       font-weight: 700;
+    }
+
+    .highlight-net {
+      color: #dc2626 !important;
+      font-weight: 700;
+    }
+
+    .highlight-zhe {
+      font-weight: 700;
+      color: #111827;
     }
 
     /* 倒余额行情评估卡片深化 */
@@ -714,7 +729,7 @@
           </label>
           <div class="input-wrapper">
             <span class="input-prefix" id="currencyPrefix1">¥</span>
-            <input type="number" id="buyPrice" class="form-control" placeholder="例如: 55 或 70" step="any" min="0" value="55">
+            <input type="number" id="buyPrice" class="form-control" placeholder="例如: 11.66 或 55" step="any" min="0" value="11.66">
           </div>
         </div>
 
@@ -726,7 +741,7 @@
           </label>
           <div class="input-wrapper">
             <span class="input-prefix" id="currencyPrefix2">¥</span>
-            <input type="number" id="steamSellPrice" class="form-control" placeholder="例如: 77.46 或 100" step="any" min="0" value="77.46">
+            <input type="number" id="steamSellPrice" class="form-control" placeholder="例如: 15.5 或 77.46" step="any" min="0" value="15.5">
           </div>
         </div>
 
@@ -734,15 +749,15 @@
         <div class="form-group">
           <label class="form-label">
             Steam 卖出到手系数
-            <span class="form-hint">默认 0.85 折 (扣除15%手续费)</span>
+            <span class="form-hint">默认 0.8666 (精算到手 86.66%)</span>
           </label>
           <div class="fee-options">
-            <div class="fee-pill active" data-rate="0.85">0.85 折 (到手 85%)</div>
-            <div class="fee-pill" data-rate="0.8666">精算 0.8666(到手86.66%)</div>
+            <div class="fee-pill active" data-rate="0.8666">精算 0.8666(到手86.66%)</div>
+            <div class="fee-pill" data-rate="0.85">0.85 折 (到手 85%)</div>
             <div class="fee-pill" data-rate="custom">自定义系数（小数）</div>
           </div>
           <div id="customRateGroup" style="display: none; margin-top: 8px;">
-            <input type="number" id="customRateInput" class="form-control" style="padding-left: 14px;" placeholder="输入到手比例，如 0.85" value="0.85" step="0.01" min="0.1" max="1">
+            <input type="number" id="customRateInput" class="form-control" style="padding-left: 14px;" placeholder="输入到手比例，如 0.8666" value="0.8666" step="0.01" min="0.1" max="1">
           </div>
         </div>
 
@@ -767,7 +782,7 @@
         <div class="formula-box">
           <!-- Steam 到手卖出价公式 -->
           <div class="formula-line">
-            <strong>Steam 实际到手余额</strong> = Steam 挂牌售价 × 到手系数 (<span id="formulaRateDisplay">0.85</span>)
+            <strong>Steam 实际到手余额</strong> = Steam 挂牌售价 × 到手系数 (<span id="formulaRateDisplay">0.8666</span>)
           </div>
           <!-- 折扣率与折数公式 -->
           <div class="formula-line" style="margin-top: 8px;">
@@ -789,7 +804,7 @@
           </div>
 
           <div class="formula-desc" id="stepFormulaDesc">
-            正在解析：Steam 标价 ¥77.46 × 0.85 = ¥65.84 到手余额；购入价 ¥55 ÷ ¥65.84 ≈ 8.35 折 (16.47% OFF)。
+            正在解析：Steam 标价 ¥15.50 × 0.85 = ¥13.18 到手余额；购入价 ¥11.66 ÷ ¥13.18 ≈ 8.85 折 (11.50% OFF)。
           </div>
         </div>
       </div>
@@ -807,10 +822,10 @@
         <div class="result-banner" id="resultBanner">
           <div class="result-label" id="mainResultTitle">折扣百分比</div>
           <div class="result-value-container">
-            <span class="result-big-value" id="mainDiscountPercent">16.470%</span>
+            <span class="result-big-value" id="mainDiscountPercent">13.194%</span>
             <span class="result-unit-suffix" id="mainUnitSuffix">OFF</span>
           </div>
-          <div class="result-sub-badge" id="mainDiscountZhe">相当于 8.35 折</div>
+          <div class="result-sub-badge" id="mainDiscountZhe">相当于 8.68 折</div>
         </div>
 
         <!-- 详细数据对照表 -->
@@ -818,35 +833,35 @@
           <tbody>
             <tr>
               <td class="label">第三方平台购入价</td>
-              <td class="value" id="resBuyPrice">¥55.00</td>
+              <td class="value" id="resBuyPrice">¥11.66</td>
             </tr>
             <tr>
               <td class="label">Steam 挂牌售价</td>
-              <td class="value" id="resSteamSellPrice">¥77.46</td>
+              <td class="value" id="resSteamSellPrice">¥15.50</td>
             </tr>
             <tr>
-              <td class="label">Steam 实际到手 (<span id="resRateDisplay">0.85</span>)</td>
-              <td class="value highlight-val" id="resSteamNetReceived">¥65.84</td>
-            </tr>
-            <tr>
-              <td class="label">节省 / 净增余额</td>
-              <td class="value highlight-val" id="resSavedAmount">+¥10.84</td>
+              <td class="label">Steam 实际到手 (<span id="resRateDisplay">0.8666</span>)</td>
+              <td class="value highlight-net" id="resSteamNetReceived">¥13.43</td>
             </tr>
             <tr>
               <td class="label">倒余额折数 (几折)</td>
-              <td class="value" id="resZheKouShu">8.35 折</td>
+              <td class="value highlight-zhe" id="resZheKouShu">8.68 折</td>
             </tr>
             <tr>
               <td class="label">折扣优惠力度</td>
-              <td class="value" id="resDiscountRate">16.47% OFF</td>
+              <td class="value" id="resDiscountRate">13.19% OFF</td>
+            </tr>
+            <tr>
+              <td class="label">节省 / 净增余额</td>
+              <td class="value highlight-val" id="resSavedAmount">+¥1.77</td>
             </tr>
             <tr>
               <td class="label">余额转化效率</td>
-              <td class="value" id="resRatio">1 现金 = 1.197 余额</td>
+              <td class="value" id="resRatio">1 现金 = 1.152 余额</td>
             </tr>
             <tr>
               <td class="label">折扣系数</td>
-              <td class="value" id="resDiscountFactor">0.835</td>
+              <td class="value" id="resDiscountFactor">0.8681</td>
             </tr>
           </tbody>
         </table>
@@ -952,7 +967,7 @@
   const resRateDisplay = document.getElementById('resRateDisplay');
   const formulaRateDisplay = document.getElementById('formulaRateDisplay');
 
-  let currentRate = 0.85;
+  let currentRate = 0.8666;
 
   // 货币符号变动
   function getCurrencySymbol() {
@@ -977,7 +992,7 @@
       const rateType = pill.getAttribute('data-rate');
       if (rateType === 'custom') {
         customRateGroup.style.display = 'block';
-        currentRate = parseFloat(customRateInput.value) || 0.85;
+        currentRate = parseFloat(customRateInput.value) || 0.8666;
       } else {
         customRateGroup.style.display = 'none';
         currentRate = parseFloat(rateType);
@@ -987,7 +1002,7 @@
   });
 
   customRateInput.addEventListener('input', () => {
-    currentRate = parseFloat(customRateInput.value) || 0.85;
+    currentRate = parseFloat(customRateInput.value) || 0.8666;
     calculate();
   });
 
@@ -1155,10 +1170,10 @@
 
   // 填入示例
   btnPresetExample.addEventListener('click', () => {
-    buyPriceInput.value = '55';
-    steamSellPriceInput.value = '77.46';
+    buyPriceInput.value = '11.66';
+    steamSellPriceInput.value = '15.5';
     calculate();
-    showToast('已载入参考图范例数据');
+    showToast('已载入范例数据');
   });
 
   // 复制结果
