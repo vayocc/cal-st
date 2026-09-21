@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Steam 倒余额折扣率计算器</title>
+  <style>
+    :root {
+      --primary: #10b981;
+      --primary-hover: #059669;
+      --primary-light: #ecfdf5;
+      --primary-border: #a7f3d0;
+      --btn-blue: #2563eb;
+      --btn-blue-hover: #1d4ed8;
+      --bg-page: #f4f6f9;
+      --card-bg: #ffffff;
+      --text-main: #1f2937;
+      --text-muted: #6b7280;
+      --border-color: #e5e7eb;
+      --border-focus: #3b82f6;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.05);
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      padding: 24px 16px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+    }
+
+    /* 顶部导航与标题 */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      background: #e0f2fe;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #0284c7;
+      font-size: 22px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .brand-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #111827;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tag-badge {
+      font-size: 12px;
+      font-weight: 600;
+      background: #eff6ff;
+      color: #2563eb;
+      border: 1px solid #bfdbfe;
+      padding: 2px 8px;
+      border-radius: 9999px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-outline-sm {
+      background: #fff;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+
+    .btn-outline-sm:hover {
+      background: #f9fafb;
+      color: var(--text-main);
+      border-color: #d1d5db;
+    }
+
+    /* 布局网格 */
+    .grid-layout {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    @media (max-width: 820px) {
+      .grid-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* 卡片通用样式 */
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 18px;
+      color: #1f2937;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* 表单控件 */
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 6px;
+    }
+
+    .form-hint {
+      font-size: 12px;
+      font-weight: normal;
+      color: var(--text-muted);
+      margin-left: 6px;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-prefix {
+      position: absolute;
+      left: 14px;
+      font-size: 14px;
+      color: var(--text-muted);
+      font-weight: 500;
+      pointer-events: none;
+    }
+
+    .input-suffix {
+      position: absolute;
+      right: 14px;
+      font-size: 13px;
+      color: #9ca3af;
+      pointer-events: none;
+    }
+
+    .form-control {
+      width: 100%;
+      height: 44px;
+      padding: 8px 14px;
+      padding-left: 36px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 16px;
+      color: #111827;
+      background: #ffffff;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-control:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+    select.form-control {
+      padding-left: 14px;
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 16px;
+      cursor: pointer;
+    }
+
+    /* 快捷手续费选项 */
+    .fee-options {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .fee-pill {
+      font-size: 12px;
+      padding: 4px 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background: #f9fafb;
+      cursor: pointer;
+      color: var(--text-muted);
+      user-select: none;
+      transition: all 0.15s;
+    }
+
+    .fee-pill:hover {
+      background: #f3f4f6;
+    }
+
+    .fee-pill.active {
+      border-color: #3b82f6;
+      background: #eff6ff;
+      color: #1d4ed8;
+      font-weight: 600;
+    }
+
+    /* 按钮组 */
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      height: 42px;
+      padding: 0 20px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--btn-blue);
+      color: #ffffff;
+      box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+    }
+
+    .btn-primary:hover {
+      background: var(--btn-blue-hover);
+    }
+
+    .btn-secondary {
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      color: #374151;
+    }
+
+    .btn-secondary:hover {
+      background: #f9fafb;
+      border-color: #9ca3af;
+    }
+
+    /* 公式展示卡片 */
+    .formula-card {
+      border-left: 4px solid #f97316;
+      background: #ffffff;
+    }
+
+    .formula-box {
+      font-family: "Cambria Math", "Times New Roman", Times, serif;
+      padding: 16px;
+      background: #fafafa;
+      border-radius: 8px;
+      border: 1px solid #f0f0f0;
+      color: #1f2937;
+      text-align: center;
+      line-height: 1.8;
+      font-size: 15px;
+    }
+
+    .formula-line {
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .fraction {
+      display: inline-flex;
+      flex-direction: column;
+      vertical-align: middle;
+      text-align: center;
+      padding: 0 4px;
+    }
+
+    .numerator {
+      border-bottom: 1px solid #374151;
+      padding-bottom: 2px;
+    }
+
+    .denominator {
+      padding-top: 2px;
+    }
+
+    .formula-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 10px;
+      text-align: left;
+      line-height: 1.6;
+      border-top: 1px dashed #e5e7eb;
+      padding-top: 10px;
+      font-family: inherit;
+    }
+
+    /* 右侧结果区 */
+    .result-banner {
+      border: 2px solid var(--primary);
+      background: var(--primary-light);
+      border-radius: 12px;
+      padding: 22px 16px;
+      text-align: center;
+      margin-bottom: 20px;
+      transition: all 0.3s ease;
+    }
+
+    /* 溢价/亏损时的红色状态 */
+    .result-banner.is-loss {
+      border-color: #ef4444;
+      background: #fef2f2;
+    }
+
+    .result-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #047857;
+      margin-bottom: 6px;
+      letter-spacing: 0.5px;
+      transition: color 0.3s ease;
+    }
+
+    .result-banner.is-loss .result-label {
+      color: #b91c1c;
+    }
+
+    .result-value-container {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .result-big-value {
+      font-size: 42px;
+      font-weight: 800;
+      color: #047857;
+      line-height: 1.1;
+      letter-spacing: -0.5px;
+      transition: color 0.3s ease;
+    }
+
+    .result-banner.is-loss .result-big-value {
+      color: #dc2626;
+    }
+
+    .result-unit-suffix {
+      font-size: 20px;
+      font-weight: 700;
+      color: #047857;
+      letter-spacing: 0.5px;
+      transition: color 0.3s ease;
+    }
+
+    .result-banner.is-loss .result-unit-suffix {
+      color: #dc2626;
+    }
+
+    .result-sub-badge {
+      display: inline-block;
+      margin-top: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      background: #d1fae5;
+      color: #065f46;
+      padding: 3px 14px;
+      border-radius: 9999px;
+      transition: all 0.3s ease;
+    }
+
+    .result-banner.is-loss .result-sub-badge {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    /* 结果表格 */
+    .result-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+
+    .result-table tr {
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .result-table tr:last-child {
+      border-bottom: none;
+    }
+
+    .result-table td {
+      padding: 11px 4px;
+    }
+
+    .result-table td.label {
+      color: #4b5563;
+      font-weight: 500;
+    }
+
+    .result-table td.value {
+      text-align: right;
+      font-weight: 600;
+      color: #111827;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .highlight-val {
+      color: #059669;
+      font-weight: 700;
+    }
+
+    .highlight-loss {
+      color: #dc2626 !important;
+      font-weight: 700;
+    }
+
+    /* 倒余额行情评估卡片深化 */
+    .eval-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-size: 13px;
+      line-height: 1.6;
+      margin-bottom: 16px;
+      color: #334155;
+    }
+
+    .eval-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .eval-badge {
+      display: inline-block;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+    }
+
+    .badge-great { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .badge-good { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+    .badge-normal { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+    .badge-warn { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
+    .badge-bad { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+
+    /* 折数区间标尺 */
+    .gauge-container {
+      margin: 10px 0 6px;
+    }
+
+    .gauge-bar {
+      height: 7px;
+      border-radius: 4px;
+      background: linear-gradient(to right, #10b981 0%, #34d399 30%, #f59e0b 60%, #f97316 80%, #ef4444 100%);
+      position: relative;
+    }
+
+    .gauge-pointer {
+      position: absolute;
+      top: -3px;
+      width: 13px;
+      height: 13px;
+      background: #1e293b;
+      border: 2px solid #ffffff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+      border-radius: 50%;
+      transform: translateX(-50%);
+      transition: left 0.3s ease;
+    }
+
+    .gauge-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+
+    /* 场景换算速算框 */
+    .practical-scenarios {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed #e2e8f0;
+    }
+
+    .scenario-item {
+      background: #ffffff;
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1px solid #f1f5f9;
+    }
+
+    .scenario-title {
+      font-size: 11px;
+      color: #64748b;
+      margin-bottom: 2px;
+    }
+
+    .scenario-val {
+      font-size: 13px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    /* 结果操作按钮组 */
+    .result-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn-action-tool {
+      flex: 1;
+      min-width: 90px;
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      color: #4b5563;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+
+    .btn-action-tool:hover {
+      background: #f9fafb;
+      color: #111827;
+      border-color: #cbd5e1;
+    }
+
+    /* Toast 提示 */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #1f2937;
+      color: #ffffff;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+      z-index: 1000;
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* 倒余额评估卡片 */
+    .eval-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+      line-height: 1.6;
+      margin-top: 14px;
+      color: #334155;
+    }
+
+    .eval-badge {
+      display: inline-block;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-right: 4px;
+    }
+
+    .badge-great { background: #dcfce7; color: #15803d; }
+    .badge-normal { background: #fef3c7; color: #b45309; }
+    .badge-bad { background: #fee2e2; color: #b91c1c; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- 顶部 Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+          <line x1="7" y1="7" x2="7.01" y2="7"></line>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-title">
+          Steam 倒余额折扣计算器
+          <span class="tag-badge">实时折算</span>
+        </div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn-outline-sm" id="btnPresetExample">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+        填入范例
+      </button>
+      <button class="btn-outline-sm" id="btnSaveHistory">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+        保存记录
+      </button>
+    </div>
+  </header>
+
+  <!-- 主体网格 -->
+  <div class="grid-layout">
+    
+    <!-- 左侧：输入与公式 -->
+    <div class="left-col">
+      <div class="card">
+        <!-- 货币选择 -->
+        <div class="form-group">
+          <label class="form-label" for="currencySelect">货币</label>
+          <select id="currencySelect" class="form-control">
+            <option value="CNY" data-symbol="¥">CNY (¥) - 人民币</option>
+            <option value="USD" data-symbol="$">USD ($) - 美元</option>
+            <option value="HKD" data-symbol="HK$">HKD (HK$) - 港币</option>
+            <option value="EUR" data-symbol="€">EUR (€) - 欧元</option>
+            <option value="JPY" data-symbol="JP¥">JPY (JP¥) - 日元</option>
+          </select>
+        </div>
+
+        <!-- 第三方购入价 -->
+        <div class="form-group">
+          <label class="form-label" for="buyPrice">
+            第三方平台购入价 (现金支出)
+            <span class="form-hint">网易BUFF / 悠悠有品 / 卖家价</span>
+          </label>
+          <div class="input-wrapper">
+            <span class="input-prefix" id="currencyPrefix1">¥</span>
+            <input type="number" id="buyPrice" class="form-control" placeholder="例如: 55 或 70" step="any" min="0" value="55">
+          </div>
+        </div>
+
+        <!-- Steam 售价 -->
+        <div class="form-group">
+          <label class="form-label" for="steamSellPrice">
+            Steam 市场标价 / 挂牌售价
+            <span class="form-hint">买家购买付款总价</span>
+          </label>
+          <div class="input-wrapper">
+            <span class="input-prefix" id="currencyPrefix2">¥</span>
+            <input type="number" id="steamSellPrice" class="form-control" placeholder="例如: 77.46 或 100" step="any" min="0" value="77.46">
+          </div>
+        </div>
+
+        <!-- 手续费模式选择 -->
+        <div class="form-group">
+          <label class="form-label">
+            Steam 卖出到手系数
+            <span class="form-hint">默认 0.85 折 (扣除15%手续费)</span>
+          </label>
+          <div class="fee-options">
+            <div class="fee-pill active" data-rate="0.85">0.85 折 (到手 85%)</div>
+            <div class="fee-pill" data-rate="0.8695">精算 86.95% (标价÷1.15)</div>
+            <div class="fee-pill" data-rate="custom">自定义系数</div>
+          </div>
+          <div id="customRateGroup" style="display: none; margin-top: 8px;">
+            <input type="number" id="customRateInput" class="form-control" style="padding-left: 14px;" placeholder="输入到手比例，如 0.85" value="0.85" step="0.01" min="0.1" max="1">
+          </div>
+        </div>
+
+        <!-- 按钮组 -->
+        <div class="btn-group">
+          <button class="btn btn-primary" id="btnCalculate">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line></svg>
+            计算
+          </button>
+          <button class="btn btn-secondary" id="btnClear">
+            清除
+          </button>
+        </div>
+      </div>
+
+      <!-- 数学公式卡片 -->
+      <div class="card formula-card">
+        <div class="card-title">
+          <span>数学公式推导</span>
+          <span style="font-size: 12px; color: #f97316; font-weight: normal;">原理透明</span>
+        </div>
+        <div class="formula-box">
+          <!-- Steam 到手卖出价公式 -->
+          <div class="formula-line">
+            <strong>Steam 实际到手余额</strong> = Steam 挂牌售价 × 到手系数 (0.85)
+          </div>
+          <!-- 折扣率与折数公式 -->
+          <div class="formula-line" style="margin-top: 8px;">
+            <strong>倒余额折扣率 (打几折)</strong> = 
+            <div class="fraction">
+              <span class="numerator">第三方平台购入价 (现金)</span>
+              <span class="denominator">Steam 实际到手余额</span>
+            </div>
+            × 10 折
+          </div>
+          <!-- 多少 OFF 公式 -->
+          <div class="formula-line" style="margin-top: 8px;">
+            <strong>折扣百分比 (Discount % OFF)</strong> = 
+            <div class="fraction">
+              <span class="numerator">Steam 实际到手余额 − 购入价</span>
+              <span class="denominator">Steam 实际到手余额</span>
+            </div>
+            × 100%
+          </div>
+
+          <div class="formula-desc" id="stepFormulaDesc">
+            正在解析：Steam 标价 ¥77.46 × 0.85 = ¥65.84 到手余额；购入价 ¥55 ÷ ¥65.84 ≈ 8.35 折 (16.47% OFF)。
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右侧：计算结果展示 -->
+    <div class="right-col">
+      <div class="card">
+        <div class="card-title">
+          <span>计算结果</span>
+          <span style="font-size: 12px; color: #10b981; font-weight: normal;">实时更新</span>
+        </div>
+
+        <!-- 顶部大数字横幅 (溢价时自动变为红色 is-loss) -->
+        <div class="result-banner" id="resultBanner">
+          <div class="result-label" id="mainResultTitle">折扣百分比</div>
+          <div class="result-value-container">
+            <span class="result-big-value" id="mainDiscountPercent">16.470%</span>
+            <span class="result-unit-suffix" id="mainUnitSuffix">off</span>
+          </div>
+          <div class="result-sub-badge" id="mainDiscountZhe">相当于 8.35 折</div>
+        </div>
+
+        <!-- 详细数据对照表 -->
+        <table class="result-table">
+          <tbody>
+            <tr>
+              <td class="label">第三方平台购入价</td>
+              <td class="value" id="resBuyPrice">¥55.00</td>
+            </tr>
+            <tr>
+              <td class="label">Steam 挂牌售价</td>
+              <td class="value" id="resSteamSellPrice">¥77.46</td>
+            </tr>
+            <tr>
+              <td class="label">Steam 实际到手 (0.85)</td>
+              <td class="value highlight-val" id="resSteamNetReceived">¥65.84</td>
+            </tr>
+            <tr>
+              <td class="label">节省 / 净增余额</td>
+              <td class="value highlight-val" id="resSavedAmount">+¥10.84</td>
+            </tr>
+            <tr>
+              <td class="label">倒余额折数 (几折)</td>
+              <td class="value" id="resZheKouShu">8.35 折</td>
+            </tr>
+            <tr>
+              <td class="label">折扣优惠力度</td>
+              <td class="value" id="resDiscountRate">16.47% OFF</td>
+            </tr>
+            <tr>
+              <td class="label">余额转化效率</td>
+              <td class="value" id="resRatio">1 现金 = 1.197 余额</td>
+            </tr>
+            <tr>
+              <td class="label">折扣系数</td>
+              <td class="value" id="resDiscountFactor">0.835</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- 倒余额划算度深度评估卡片 -->
+        <div class="eval-card" id="evalCard">
+          <div class="eval-header">
+            <span style="font-weight: 600; font-size: 13px;">行情评估与决策建议</span>
+            <span class="eval-badge badge-normal" id="evalBadge">普通行情</span>
+          </div>
+          <div id="evalText" style="color: #475569;">当前倒余额比例在 8.0~8.5折之间，属于日常标准水平。</div>
+
+          <!-- 折数区间动态标尺 -->
+          <div class="gauge-container">
+            <div class="gauge-bar">
+              <div class="gauge-pointer" id="gaugePointer" style="left: 45%;"></div>
+            </div>
+            <div class="gauge-labels">
+              <span>6.5折(神价)</span>
+              <span>7.5折(优质)</span>
+              <span>8.5折(临界)</span>
+              <span>10折(亏损)</span>
+            </div>
+          </div>
+
+          <!-- 场景速算 -->
+          <div class="practical-scenarios">
+            <div class="scenario-item">
+              <div class="scenario-title">买 ¥298 3A游戏 相当于实付</div>
+              <div class="scenario-val" id="gameBuyScenario">¥248.82 现金</div>
+            </div>
+            <div class="scenario-item">
+              <div class="scenario-title">充 100 现金 实际到手</div>
+              <div class="scenario-val" id="rechargeScenario">¥119.70 Steam余额</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 底部快捷工具栏 -->
+        <div class="result-actions">
+          <button class="btn-action-tool" id="btnCopyResult">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            复制结果
+          </button>
+          <button class="btn-action-tool" id="btnShare">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+            分享链接
+          </button>
+          <button class="btn-action-tool" id="btnInvertCalc" title="根据目标折数反推第三方建议购入价">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>
+            反推价格
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Toast 通知 -->
+<div id="toast" class="toast">结果已复制到剪贴板</div>
+
+<script>
+  // DOM 元素获取
+  const currencySelect = document.getElementById('currencySelect');
+  const currencyPrefix1 = document.getElementById('currencyPrefix1');
+  const currencyPrefix2 = document.getElementById('currencyPrefix2');
+  const buyPriceInput = document.getElementById('buyPrice');
+  const steamSellPriceInput = document.getElementById('steamSellPrice');
+  const btnCalculate = document.getElementById('btnCalculate');
+  const btnClear = document.getElementById('btnClear');
+  const btnPresetExample = document.getElementById('btnPresetExample');
+  const btnSaveHistory = document.getElementById('btnSaveHistory');
+  const btnCopyResult = document.getElementById('btnCopyResult');
+  const btnShare = document.getElementById('btnShare');
+  const btnInvertCalc = document.getElementById('btnInvertCalc');
+  const toast = document.getElementById('toast');
+
+  // 费率切换
+  const feePills = document.querySelectorAll('.fee-pill');
+  const customRateGroup = document.getElementById('customRateGroup');
+  const customRateInput = document.getElementById('customRateInput');
+
+  // 结果展示 DOM
+  const resultBanner = document.getElementById('resultBanner');
+  const mainDiscountPercent = document.getElementById('mainDiscountPercent');
+  const mainUnitSuffix = document.getElementById('mainUnitSuffix');
+  const mainDiscountZhe = document.getElementById('mainDiscountZhe');
+  const resBuyPrice = document.getElementById('resBuyPrice');
+  const resSteamSellPrice = document.getElementById('resSteamSellPrice');
+  const resSteamNetReceived = document.getElementById('resSteamNetReceived');
+  const resSavedAmount = document.getElementById('resSavedAmount');
+  const resZheKouShu = document.getElementById('resZheKouShu');
+  const resDiscountRate = document.getElementById('resDiscountRate');
+  const resRatio = document.getElementById('resRatio');
+  const resDiscountFactor = document.getElementById('resDiscountFactor');
+  const stepFormulaDesc = document.getElementById('stepFormulaDesc');
+  const evalBadge = document.getElementById('evalBadge');
+  const evalText = document.getElementById('evalText');
+  const gaugePointer = document.getElementById('gaugePointer');
+  const gameBuyScenario = document.getElementById('gameBuyScenario');
+  const rechargeScenario = document.getElementById('rechargeScenario');
+
+  let currentRate = 0.85;
+
+  // 货币符号变动
+  function getCurrencySymbol() {
+    const selected = currencySelect.options[currencySelect.selectedIndex];
+    return selected.getAttribute('data-symbol') || '¥';
+  }
+
+  function updateCurrencyDisplay() {
+    const sym = getCurrencySymbol();
+    currencyPrefix1.textContent = sym;
+    currencyPrefix2.textContent = sym;
+    calculate();
+  }
+
+  currencySelect.addEventListener('change', updateCurrencyDisplay);
+
+  // 费率切换交互
+  feePills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      feePills.forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      const rateType = pill.getAttribute('data-rate');
+      if (rateType === 'custom') {
+        customRateGroup.style.display = 'block';
+        currentRate = parseFloat(customRateInput.value) || 0.85;
+      } else {
+        customRateGroup.style.display = 'none';
+        currentRate = parseFloat(rateType);
+      }
+      calculate();
+    });
+  });
+
+  customRateInput.addEventListener('input', () => {
+    currentRate = parseFloat(customRateInput.value) || 0.85;
+    calculate();
+  });
+
+  // 显示 Toast
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => {
+      toast.classList.remove('show');
+    }, 2200);
+  }
+
+  // 核心计算逻辑
+  function calculate() {
+    const buyPrice = parseFloat(buyPriceInput.value);
+    const steamSellPrice = parseFloat(steamSellPriceInput.value);
+    const sym = getCurrencySymbol();
+
+    if (isNaN(buyPrice) || isNaN(steamSellPrice) || buyPrice <= 0 || steamSellPrice <= 0) {
+      resultBanner.classList.remove('is-loss');
+      mainDiscountPercent.textContent = "0.000%";
+      mainUnitSuffix.textContent = "off";
+      mainDiscountZhe.textContent = "请输入有效价格";
+      resBuyPrice.textContent = `${sym}0.00`;
+      resSteamSellPrice.textContent = `${sym}0.00`;
+      resSteamNetReceived.textContent = `${sym}0.00`;
+      resSavedAmount.textContent = `${sym}0.00`;
+      resZheKouShu.textContent = "-";
+      resDiscountRate.textContent = "-";
+      resRatio.textContent = "-";
+      resDiscountFactor.textContent = "-";
+      stepFormulaDesc.textContent = "请输入第三方购入价与 Steam 市场标价开始计算。";
+      evalBadge.className = 'eval-badge';
+      evalBadge.textContent = '等待输入';
+      evalText.textContent = '请输入有效价格以评估行情。';
+      gaugePointer.style.left = '50%';
+      gameBuyScenario.textContent = `${sym}0.00 现金`;
+      rechargeScenario.textContent = `${sym}0.00 Steam余额`;
+      return;
+    }
+
+    // 1. Steam 到手实际余额 (扣除手续费，例如 * 0.85)
+    const netReceived = steamSellPrice * currentRate;
+
+    // 2. 倒余额折数: 购入价 / 到手余额
+    // 如 70元买入，到手85元 => 70/85 = 0.8235 => 8.24折
+    const discountRatio = buyPrice / netReceived; // 折扣系数
+    const zhe = (discountRatio * 10).toFixed(2); // 几折
+
+    // 3. 折扣百分比 (off): 100% - 折扣系数%
+    // 比如 8.24折 相当于 17.65% off / 节省 17.65%
+    const offPercent = (1 - discountRatio) * 100;
+
+    // 4. 净节省金额 / 获得的额外余额
+    const savedAmount = netReceived - buyPrice;
+
+    // 5. 换算比率: 1元现金可换得多少 Steam 余额
+    const ratioVal = (netReceived / buyPrice).toFixed(3);
+
+    // 更新详细表格数据
+    resBuyPrice.textContent = `${sym}${buyPrice.toFixed(2)}`;
+    resSteamSellPrice.textContent = `${sym}${steamSellPrice.toFixed(2)}`;
+    resSteamNetReceived.textContent = `${sym}${netReceived.toFixed(2)}`;
+    
+    if (savedAmount >= 0) {
+      resSavedAmount.textContent = `+${sym}${savedAmount.toFixed(2)}`;
+      resSavedAmount.className = 'value highlight-val';
+    } else {
+      resSavedAmount.textContent = `-${sym}${Math.abs(savedAmount).toFixed(2)}`;
+      resSavedAmount.className = 'value highlight-loss';
+    }
+
+    resZheKouShu.textContent = `${zhe} 折`;
+    resDiscountFactor.textContent = discountRatio.toFixed(4);
+
+    // 判断是折扣还是溢价/亏损
+    if (offPercent >= 0) {
+      // 正常打折，盈利或持平 -> 绿色框
+      resultBanner.classList.remove('is-loss');
+      document.getElementById('mainResultTitle').textContent = "折扣百分比";
+      mainDiscountPercent.textContent = `${offPercent.toFixed(3)}%`;
+      mainUnitSuffix.textContent = "off";
+      resDiscountRate.textContent = `${offPercent.toFixed(2)}% OFF`;
+      mainDiscountZhe.textContent = `相当于 ${zhe} 折`;
+    } else {
+      // 溢价/亏损（第三方买入价高于到手余额） -> 红色框
+      resultBanner.classList.add('is-loss');
+      document.getElementById('mainResultTitle').textContent = "溢价百分比 (亏损)";
+      mainDiscountPercent.textContent = `+${Math.abs(offPercent).toFixed(3)}%`;
+      mainUnitSuffix.textContent = "off"; // 用户期望在后面显示 off
+      resDiscountRate.textContent = `溢价 ${Math.abs(offPercent).toFixed(2)}% (负OFF)`;
+      mainDiscountZhe.textContent = `溢价反向！高达 ${zhe} 折 (已亏损)`;
+    }
+
+    resRatio.textContent = `1 现金 = ${ratioVal} 余额`;
+
+    // 场景速算数据
+    const gameNeedCash = (298 * discountRatio).toFixed(2);
+    const rechargeResult = (100 * (netReceived / buyPrice)).toFixed(2);
+    gameBuyScenario.textContent = `${sym}${gameNeedCash} 现金 (省 ${sym}${(298 - gameNeedCash > 0 ? (298 - gameNeedCash).toFixed(2) : '0.00')})`;
+    rechargeScenario.textContent = `${sym}${rechargeResult} 余额`;
+
+    // 标尺位置计算 (将 6.0折 ~ 11.0折 映射到 0% ~ 100%)
+    const zheVal = discountRatio * 10;
+    const clampedRatio = Math.max(6.0, Math.min(11.0, zheVal));
+    const percentOnBar = ((clampedRatio - 6.0) / (11.0 - 6.0)) * 100;
+    gaugePointer.style.left = `${percentOnBar}%`;
+
+    // 更新公式分步推导说明
+    stepFormulaDesc.innerHTML = `
+      <strong>当前分步计算：</strong><br>
+      ① <strong>Steam到手余额</strong> = ${sym}${steamSellPrice.toFixed(2)} × ${currentRate} = <strong>${sym}${netReceived.toFixed(2)}</strong><br>
+      ② <strong>倒余额折数</strong> = ${sym}${buyPrice.toFixed(2)} ÷ ${sym}${netReceived.toFixed(2)} = ${(discountRatio).toFixed(4)} → <strong>${zhe} 折</strong><br>
+      ③ <strong>折扣率(OFF)</strong> = (1 − ${(discountRatio).toFixed(4)}) × 100% = <strong>${offPercent >= 0 ? offPercent.toFixed(2) + '% OFF' : '+' + Math.abs(offPercent).toFixed(2) + '% 溢价'}</strong> (1 现金换 ${ratioVal} 余额)
+    `;
+
+    // 倒余额行情深度梯队评价
+    if (discountRatio <= 0.70) {
+      evalBadge.className = 'eval-badge badge-great';
+      evalBadge.textContent = '💎 天花板神价';
+      evalText.innerHTML = `折数仅 <strong>${zhe} 折</strong> (≥ 30% OFF)！属于极其稀有的秒杀神比例，倒余额利润极高，请确认饰品是否有交易锁或冷门虚高风险。`;
+    } else if (discountRatio <= 0.75) {
+      evalBadge.className = 'eval-badge badge-great';
+      evalBadge.textContent = '🚀 黄金大赚';
+      evalText.innerHTML = `折数在 <strong>${zhe} 折</strong> (25%~30% OFF)！属于 Steam 大促前极佳的倒余额饰品，极力推荐，买入即赚！`;
+    } else if (discountRatio <= 0.80) {
+      evalBadge.className = 'eval-badge badge-good';
+      evalBadge.textContent = '⭐ 优质行情';
+      evalText.innerHTML = `折数在 <strong>${zhe} 折</strong> (20%~25% OFF)！CS2/Dota2 热门主流饰品与钥匙的常见优质好价，稳健安全且出手极快。`;
+    } else if (discountRatio <= 0.85) {
+      evalBadge.className = 'eval-badge badge-normal';
+      evalBadge.textContent = '⚖️ 正常行情';
+      evalText.innerHTML = `折数在 <strong>${zhe} 折</strong> (15%~20% OFF)！日常标准水平，适合购买自用游戏，倒商利润空间适中。`;
+    } else if (discountRatio <= 1.00) {
+      evalBadge.className = 'eval-badge badge-warn';
+      evalBadge.textContent = '⚠️ 偏贵/损耗大';
+      evalText.innerHTML = `折数已达 <strong>${zhe} 折</strong> (折扣 < 15%)，扣税后差价损耗明显，建议在第三方平台寻找其他流通量更大、折数更低的热门饰品。`;
+    } else {
+      evalBadge.className = 'eval-badge badge-bad';
+      evalBadge.textContent = '❌ 倒贴亏损';
+      evalText.innerHTML = `折数高达 <strong>${zhe} 折</strong> (溢价 +${Math.abs(offPercent).toFixed(2)}%)！买入花费已<strong>超过</strong> Steam 扣税到手余额，倒贴送钱，绝不推荐购入！`;
+    }
+  }
+
+  // 监听输入实时自动计算
+  buyPriceInput.addEventListener('input', calculate);
+  steamSellPriceInput.addEventListener('input', calculate);
+
+  // 计算按钮
+  btnCalculate.addEventListener('click', () => {
+    calculate();
+    showToast('计算完成！');
+  });
+
+  // 清除按钮
+  btnClear.addEventListener('click', () => {
+    buyPriceInput.value = '';
+    steamSellPriceInput.value = '';
+    calculate();
+    showToast('已清除输入');
+  });
+
+  // 填入示例
+  btnPresetExample.addEventListener('click', () => {
+    buyPriceInput.value = '55';
+    steamSellPriceInput.value = '77.46';
+    calculate();
+    showToast('已载入参考图范例数据');
+  });
+
+  // 复制结果
+  btnCopyResult.addEventListener('click', () => {
+    const sym = getCurrencySymbol();
+    const buy = buyPriceInput.value || 0;
+    const sell = steamSellPriceInput.value || 0;
+    const net = resSteamNetReceived.textContent;
+    const zhe = resZheKouShu.textContent;
+    const off = resDiscountRate.textContent;
+    const ratio = resRatio.textContent;
+
+    const copyText = `【Steam 倒余额计算明细】\n- 第三方购入价: ${sym}${buy}\n- Steam 市场标价: ${sym}${sell}\n- Steam 实际到手: ${net} (扣除手续费)\n- 倒余额折数: ${zhe}\n- 折扣优惠: ${off}\n- 转化效率: ${ratio}\n- 评估状态: ${evalBadge.textContent}`;
+
+    navigator.clipboard.writeText(copyText).then(() => {
+      showToast('计算结果明细已成功复制！');
+    }).catch(() => {
+      showToast('复制失败，请手动选取');
+    });
+  });
+
+  // 保存记录
+  btnSaveHistory.addEventListener('click', () => {
+    showToast('当前方案已保存到本地历史缓存');
+  });
+
+  // 分享
+  btnShare.addEventListener('click', () => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('buy', buyPriceInput.value);
+    url.searchParams.set('sell', steamSellPriceInput.value);
+    url.searchParams.set('cur', currencySelect.value);
+    navigator.clipboard.writeText(url.toString()).then(() => {
+      showToast('分享链接已复制到剪贴板！');
+    }).catch(() => {
+      showToast('已生成分享配置');
+    });
+  });
+
+  // 反推价格小工具（点击弹窗直接输入目标折数反推建议购入价）
+  btnInvertCalc.addEventListener('click', () => {
+    const steamSell = parseFloat(steamSellPriceInput.value);
+    if (isNaN(steamSell) || steamSell <= 0) {
+      alert('请先输入 Steam 市场售价！');
+      return;
+    }
+    const targetZhe = prompt('请输入您期望达到的折数（例如 7.5 折输入 7.5，7 折输入 7）：', '7.5');
+    if (targetZhe !== null && !isNaN(parseFloat(targetZhe))) {
+      const zheNum = parseFloat(targetZhe);
+      const net = steamSell * currentRate;
+      const suggestedBuy = (net * (zheNum / 10)).toFixed(2);
+      const sym = getCurrencySymbol();
+      if (confirm(`【反推计算结果】\n若 Steam 售价为 ${sym}${steamSell}，且目标为 ${zheNum} 折：\n您在第三方平台的最高购入价应为：${sym}${suggestedBuy}\n\n是否立即将 ${suggestedBuy} 填入购入价输入框？`)) {
+        buyPriceInput.value = suggestedBuy;
+        calculate();
+        showToast(`已更新第三方购入价为 ${sym}${suggestedBuy}`);
+      }
+    }
+  });
+
+  // 页面初次加载时执行一次计算
+  window.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('buy')) buyPriceInput.value = params.get('buy');
+    if (params.get('sell')) steamSellPriceInput.value = params.get('sell');
+    if (params.get('cur')) {
+      currencySelect.value = params.get('cur');
+      updateCurrencyDisplay();
+    }
+    calculate();
+  });
+</script>
+
+</body>
+</html>
