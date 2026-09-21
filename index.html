@@ -402,6 +402,7 @@
       font-weight: 700;
       color: #047857;
       letter-spacing: 0.5px;
+      text-transform: uppercase;
       transition: color 0.3s ease;
     }
 
@@ -793,7 +794,7 @@
           <div class="result-label" id="mainResultTitle">折扣百分比</div>
           <div class="result-value-container">
             <span class="result-big-value" id="mainDiscountPercent">16.470%</span>
-            <span class="result-unit-suffix" id="mainUnitSuffix">off</span>
+            <span class="result-unit-suffix" id="mainUnitSuffix">OFF</span>
           </div>
           <div class="result-sub-badge" id="mainDiscountZhe">相当于 8.35 折</div>
         </div>
@@ -992,7 +993,7 @@
     if (isNaN(buyPrice) || isNaN(steamSellPrice) || buyPrice <= 0 || steamSellPrice <= 0) {
       resultBanner.classList.remove('is-loss');
       mainDiscountPercent.textContent = "0.000%";
-      mainUnitSuffix.textContent = "off";
+      mainUnitSuffix.textContent = "OFF";
       mainDiscountZhe.textContent = "请输入有效价格";
       resBuyPrice.textContent = `${sym}0.00`;
       resSteamSellPrice.textContent = `${sym}0.00`;
@@ -1052,7 +1053,7 @@
       resultBanner.classList.remove('is-loss');
       document.getElementById('mainResultTitle').textContent = "折扣百分比";
       mainDiscountPercent.textContent = `${offPercent.toFixed(3)}%`;
-      mainUnitSuffix.textContent = "off";
+      mainUnitSuffix.textContent = "OFF";
       resDiscountRate.textContent = `${offPercent.toFixed(2)}% OFF`;
       mainDiscountZhe.textContent = `相当于 ${zhe} 折`;
     } else {
@@ -1060,7 +1061,7 @@
       resultBanner.classList.add('is-loss');
       document.getElementById('mainResultTitle').textContent = "溢价百分比 (亏损)";
       mainDiscountPercent.textContent = `+${Math.abs(offPercent).toFixed(3)}%`;
-      mainUnitSuffix.textContent = "off"; // 用户期望在后面显示 off
+      mainUnitSuffix.textContent = "OFF"; // 用户期望在后面显示 OFF
       resDiscountRate.textContent = `溢价 ${Math.abs(offPercent).toFixed(2)}% (负OFF)`;
       mainDiscountZhe.textContent = `溢价反向！高达 ${zhe} 折 (已亏损)`;
     }
